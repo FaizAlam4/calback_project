@@ -1,76 +1,77 @@
 const fs = require("fs");
 const readlineSync = require("readline-sync");
 
-let range = Math.random() * 10;
-range = Math.ceil(range);
+let range = Math.random() * 10 + 1;
+range = Math.floor(range);
 
 let path = "./myFiles";
 
 function fsProblem1(absolutePathOfRandomDirectory, randomNumberOfFiles) {
-  let data = {
-    name: "Faiz",
-    age: "18",
-  };
-
-  data = JSON.stringify(data);
-
-  function randomFileGenerator(
-    absolutePathOfRandomDirectory,
-    randomNumberOfFiles
-  ) {
-    for (let i = 0; i <= randomNumberOfFiles; i++) {
-      fs.writeFile(
-        `${absolutePathOfRandomDirectory}/file${i}.json`,
-        data,
-        (err) => {
-          if (err) {
-            console.log("There is an error:", err);
-          }
-        }
-      );
-    }
-    let answer = readlineSync.question(
-      "Do you want to delete them simultaneously (y/n)?"
-    );
-    if (answer == "y") {
-      fs.readdir(`${absolutePathOfRandomDirectory}`, (err, files) => {
-        if (err) {
-          console.log(err);
-        }
-        files = files.toString();
-        let filesArray = files.split(",");
-        console.log(filesArray);
-
-        filesArray.forEach((myFile) => {
-          fs.unlink(`${absolutePathOfRandomDirectory}/${myFile}`, (err) => {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log("no error, files deleted successfully!");
-            }
-          });
-        });
-      });
-    }
-  }
-
   fs.access(absolutePathOfRandomDirectory, (err) => {
     if (err) {
-      console.log("No such directory, So I created it now..");
+      console.log("no such directory exists, I'll make it..");
       fs.mkdir(absolutePathOfRandomDirectory, (err) => {
         if (err) {
-          console.log("No permission for making the directory");
+          console.log("There is an error in making directory");
         } else {
           randomFileGenerator(
             absolutePathOfRandomDirectory,
-            randomNumberOfFiles
+            randomNumberOfFiles,
+            deleteFile
           );
         }
       });
     } else {
-      randomFileGenerator(absolutePathOfRandomDirectory, randomNumberOfFiles);
+      randomFileGenerator(
+        absolutePathOfRandomDirectory,
+        randomNumberOfFiles,
+        deleteFile
+      );
     }
   });
+
+  let randomFileGenerator = (
+    absolutePathOfRandomDirectory,
+    randomNumberOfFiles,
+    callback
+  ) => {
+    for (let index = 1; index <= randomNumberOfFiles; index++) {
+      fs.writeFile(
+        `${absolutePathOfRandomDirectory}/generatedFile${index}.json`,
+        '{"message":"welcome"}',
+        (err) => {
+          if (err) {
+            console.log("Couldn't write or create files..");
+          }
+        }
+      );
+    }
+    let answer = readlineSync.question("Do you want to delete files(y/n)");
+    if (answer == "y") {
+      callback(absolutePathOfRandomDirectory);
+    }
+  };
+
+  let deleteFile = (absolutePathOfRandomDirectory) => {
+    fs.readdir(absolutePathOfRandomDirectory, "utf-8", (err, data) => {
+      if (err) {
+        console.log(err);
+      } else {
+        data = data.toString();
+
+        let fileNames = data.split(",");
+        fileNames.forEach((ele) => {
+          fs.unlink(absolutePathOfRandomDirectory + "/" + ele, (err) => {
+            if (err) {
+              console.log("Can't delete");
+            } else {
+              console.log("Files deleted successfully!");
+            }
+          });
+        });
+      }
+    });
+  };
 }
 
 fsProblem1(path, range);
