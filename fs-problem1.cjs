@@ -42,6 +42,7 @@ function fsProblem1(absolutePathOfRandomDirectory, randomNumberOfFiles) {
         (err) => {
           if (err) {
             console.log("Couldn't write or create files..");
+            return;
           }
         }
       );
